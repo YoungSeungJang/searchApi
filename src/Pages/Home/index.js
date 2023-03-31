@@ -85,8 +85,6 @@ const HomePage = () => {
 		}
 	};
 
-
-
 	// useEffect(() => {
 	// 	// content가 있는데 조건을 만족시켜서 setResult([])을 하길래
 	// 	// result배열을 복사해서 다시 넣어줌

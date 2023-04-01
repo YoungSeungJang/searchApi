@@ -1,4 +1,5 @@
 import Api from 'Apis/searchapi';
+import useDebounce from 'Hooks/useDebounce';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import RecentSearch from './Components/RecentSearch/recentSearch';
@@ -12,8 +13,9 @@ const HomePage = () => {
 	const [result, setResult] = useState();
 	const [correct, setCorrect] = useState();
 	const [recentKeyword, setRecentKeyword] = useState();
-
 	const [focusIdx, setFocusIdx] = useState(-1);
+
+	const debounceValue = useDebounce(content);
 
 	const fetchContent = async content => {
 		const res = await Api.SearchApi(content);
@@ -40,24 +42,30 @@ const HomePage = () => {
 
 		if (e.key === 'Enter') {
 			if (!content || focusIdx === -1) return;
+			if (arr.find(item => item === content)) {
+				const RepeatIndex = arr?.findIndex(item => item === content);
+				arr.splice(RepeatIndex, 1);
+				arr.unshift(content);
+				localStorage.setItem('data', JSON.stringify(arr));
+				setRecentKeyword(arr);
+			} else {
+				const focusWord = result[focusIdx];
+				setCorrect(focusWord);
+				arr.unshift(focusWord);
 
-			const focusWord = result[focusIdx];
-			setCorrect(focusWord);
-			arr.unshift(focusWord);
+				if (arr.length > 5) arr.pop();
 
-			if (arr.length > 5) arr.pop();
-
-			localStorage.setItem('data', JSON.stringify(arr));
-			setRecentKeyword(arr);
+				localStorage.setItem('data', JSON.stringify(arr));
+				setRecentKeyword(arr);
+			}
 		}
+
 		if (e.key === 'Escape') {
 			setFocusIdx(-1);
 		}
 	};
 
 	const onClickSearchBtn = async () => {
-		if (!content) return;
-
 		try {
 			const res = await Api.SearchApi(content);
 			const findWord = res.data.find(item => item === content);
@@ -76,7 +84,6 @@ const HomePage = () => {
 			if (arr.length > 5) arr.pop();
 			localStorage.setItem('data', JSON.stringify(arr));
 			setRecentKeyword(arr);
-			console.log(arr);
 		} else {
 			arr.splice(RepeatIndex, 1);
 			arr.unshift(content);
@@ -85,13 +92,15 @@ const HomePage = () => {
 		}
 	};
 
-	// useEffect(() => {
-	// 	// content가 있는데 조건을 만족시켜서 setResult([])을 하길래
-	// 	// result배열을 복사해서 다시 넣어줌
-	// 	if (!content) return setResult([]);
-	// 	if (focusIdx > -1) return;
-	// 	fetchContent(content);
-	// }, [content]);
+	useEffect(() => {
+		// content가 있는데 조건을 만족시켜서 setResult([])을 하길래
+		// result배열을 복사해서 다시 넣어줌
+		if (!content) return setResult([]);
+
+		if (focusIdx > -1) return;
+		fetchContent(debounceValue);
+	}, [debounceValue]);
+
 	/* 
 
 	1. 마운트시 무조건 한번 실행
@@ -104,7 +113,6 @@ const HomePage = () => {
 		if (localStorage.data === undefined)
 			return localStorage.setItem('data', JSON.stringify([]));
 		setRecentKeyword(JSON.parse(localStorage.getItem('data')));
-		// console.log('이펙트')
 	}, []);
 
 	useEffect(() => {
@@ -124,7 +132,7 @@ const HomePage = () => {
 				<button onClick={onClickSearchBtn}>검색</button>
 			</S.Wrapper>
 			<RecentSearch recentKeyword={recentKeyword} />
-			<SearchList result={result} focusIdx={focusIdx} />
+			<SearchList result={result} focusIdx={focusIdx} content={content} />
 			<SearchResult correct={correct} />
 		</div>
 	);

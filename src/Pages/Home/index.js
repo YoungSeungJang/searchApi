@@ -1,3 +1,6 @@
+import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
+import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Api from 'Apis/searchapi';
 import useDebounce from 'Hooks/useDebounce';
 import { useEffect, useState } from 'react';
@@ -95,6 +98,7 @@ const HomePage = () => {
 	useEffect(() => {
 		// content가 있는데 조건을 만족시켜서 setResult([])을 하길래
 		// result배열을 복사해서 다시 넣어줌
+		// !!! 해결해서 다시지움
 		if (!content) return setResult([]);
 
 		if (focusIdx > -1) return;
@@ -121,38 +125,80 @@ const HomePage = () => {
 	}, [focusIdx]);
 
 	return (
-		<div>
-			<S.Wrapper>
+		<S.Wrapper>
+			<S.SearchWrapper>
 				<S.Input
 					onChange={onChangeContent}
 					onKeyDown={onKeyPressArrow}
 					value={content}
 				/>
-				<button>X</button>
-				<button onClick={onClickSearchBtn}>검색</button>
-			</S.Wrapper>
+				<S.SearchIcon>
+					<FontAwesomeIcon icon={faCircleXmark} />
+					<FontAwesomeIcon
+						icon={faMagnifyingGlass}
+						onClick={onClickSearchBtn}
+					/>
+				</S.SearchIcon>
+			</S.SearchWrapper>
 			<RecentSearch recentKeyword={recentKeyword} />
 			<SearchList result={result} focusIdx={focusIdx} content={content} />
 			<SearchResult correct={correct} />
-		</div>
+		</S.Wrapper>
 	);
 };
 
 export default HomePage;
 
 const Wrapper = styled.div`
+	width: 400px;
+	border: 1px solid blue;
+	margin: 0 auto;
+	position: relative;
+`;
+
+const SearchWrapper = styled.div`
+	width: 400px;
+	height: 45px;
+	position: relative;
+	border: 0;
+	& > div {
+		position: absolute;
+		right: 10px;
+		top: 10px;
+		& > *:first-child {
+			margin: 0 10px;
+		}
+	}
 	border: 1px solid red;
+	background-color: blue;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 `;
 
+const SearchIcon = styled.div`
+	/* position: relative;
+	right: 70px; */
+`;
+
 const Input = styled.input`
+	/* width: 100%;
+	height: 100%;
 	font-size: 2rem;
 	margin: 25px;
+	border: none;
+	background-color: #eaeaea; */
+	border: none;
+	padding-left: 10px;
+	background-color: #eaeaea;
+	width: 100%;
+	height: 100%;
+	outline: none;
 `;
 
 const S = {
 	Wrapper,
+	SearchWrapper,
 	Input,
+	SearchIcon,
 };

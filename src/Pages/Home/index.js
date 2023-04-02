@@ -8,6 +8,7 @@ import styled from 'styled-components';
 import RecentSearch from './Components/RecentSearch/recentSearch';
 import SearchList from './Components/SearchList/searchList';
 import SearchResult from './Components/SearchResult/searchResult';
+import Logo from 'Assets/img/logo.svg';
 
 let arr = JSON.parse(localStorage.getItem('data'));
 
@@ -95,6 +96,11 @@ const HomePage = () => {
 		}
 	};
 
+	const onClickXmark = () => {
+		setContent('');
+		setFocusIdx(-1);
+	};
+
 	useEffect(() => {
 		// content가 있는데 조건을 만족시켜서 setResult([])을 하길래
 		// result배열을 복사해서 다시 넣어줌
@@ -126,23 +132,28 @@ const HomePage = () => {
 
 	return (
 		<S.Wrapper>
+			<img src={Logo} />
+			<RecentSearch recentKeyword={recentKeyword} />
 			<S.SearchWrapper>
 				<S.Input
 					onChange={onChangeContent}
 					onKeyDown={onKeyPressArrow}
 					value={content}
 				/>
-				<S.SearchIcon>
-					<FontAwesomeIcon icon={faCircleXmark} />
+				<div>
+					<FontAwesomeIcon icon={faCircleXmark} onClick={onClickXmark} />
 					<FontAwesomeIcon
 						icon={faMagnifyingGlass}
 						onClick={onClickSearchBtn}
 					/>
-				</S.SearchIcon>
+				</div>
 			</S.SearchWrapper>
-			<RecentSearch recentKeyword={recentKeyword} />
-			<SearchList result={result} focusIdx={focusIdx} content={content} />
-			<SearchResult correct={correct} />
+			{content && (
+				<S.ResultWrapper>
+					<SearchList result={result} focusIdx={focusIdx} content={content} />
+					<SearchResult correct={correct} />
+				</S.ResultWrapper>
+			)}
 		</S.Wrapper>
 	);
 };
@@ -150,55 +161,50 @@ const HomePage = () => {
 export default HomePage;
 
 const Wrapper = styled.div`
-	width: 400px;
-	border: 1px solid blue;
-	margin: 0 auto;
-	position: relative;
+	width: 600px;
+	margin: 150px auto;
 `;
 
 const SearchWrapper = styled.div`
-	width: 400px;
-	height: 45px;
+	width: 100%;
+	height: 50px;
 	position: relative;
-	border: 0;
+	border: none;
 	& > div {
 		position: absolute;
 		right: 10px;
-		top: 10px;
 		& > *:first-child {
 			margin: 0 10px;
 		}
 	}
-	border: 1px solid red;
-	background-color: blue;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-`;
-
-const SearchIcon = styled.div`
-	/* position: relative;
-	right: 70px; */
+	outline: none;
 `;
 
 const Input = styled.input`
-	/* width: 100%;
-	height: 100%;
-	font-size: 2rem;
-	margin: 25px;
-	border: none;
-	background-color: #eaeaea; */
-	border: none;
+	font-size: 1.3rem;
 	padding-left: 10px;
+	padding-right: 60px;
 	background-color: #eaeaea;
 	width: 100%;
 	height: 100%;
+	border: none;
+	border-radius: 20px;
 	outline: none;
+`;
+
+const ResultWrapper = styled.div`
+	background-color: #fff;
+	padding: 10px;
+	border: 2px solid;
+	border-radius: 20px;
 `;
 
 const S = {
 	Wrapper,
 	SearchWrapper,
 	Input,
-	SearchIcon,
+	ResultWrapper,
 };
